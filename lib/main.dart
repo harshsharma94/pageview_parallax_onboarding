@@ -1,4 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:pageview_parallax_onboarding/NotifyingPageView.dart';
+
+import 'PageViewState.dart';
 
 void main() {
   runApp(MyApp());
@@ -23,6 +26,21 @@ class HomePage extends StatefulWidget {
 }
 
 class _HomePageState extends State<HomePage> {
+  ValueNotifier<PageViewState> _notifier = ValueNotifier<PageViewState>(PageViewState(pageProgress: 0, previousPage: 0));
+  var _sharedElementKey = GlobalKey(); // TODO:
+
+  @override
+  void initState() {
+    super.initState();
+  }
+
+
+  @override
+  void dispose() {
+    _notifier.dispose();
+    super.dispose();
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -30,8 +48,10 @@ class _HomePageState extends State<HomePage> {
         child: Column(
           children: [
             Expanded(
-              child: PageView(
+              child: NotifyingPageView(
                 children: _pages(),
+                notifier: _notifier,
+                sharedElement: _sharedElementKey,
               ),
             ),
           ],
