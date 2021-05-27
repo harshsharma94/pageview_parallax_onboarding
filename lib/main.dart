@@ -1,6 +1,7 @@
 import 'dart:ui';
 
 import 'package:flutter/material.dart';
+import 'package:pageview_parallax_onboarding/LogoView.dart';
 import 'package:pageview_parallax_onboarding/NotifyingPageView.dart';
 import 'package:rect_getter/rect_getter.dart';
 
@@ -57,7 +58,7 @@ class _HomePageState extends State<HomePage> {
                   child: SizedBox(
                     width: sharedRect.width,
                     height: sharedRect.height,
-                    child: FlutterLogo(),
+                    child: LogoView(color: Color(0x5060c9f8), assetName: "flutter"),
                   )
               );
             }
@@ -113,12 +114,12 @@ class _HomePageState extends State<HomePage> {
       GridView.count(
         crossAxisCount: 2,
         children: <Widget>[
-          FlutterLogo(),
+          LogoView(color: Color(0x50000000), assetName: "reactnative",),
           RectGetter(key: _sharedElementKey, child: Container()),
-          FlutterLogo(),
-          FlutterLogo(),
-          FlutterLogo(),
-          FlutterLogo(),
+          LogoView(color: Color(0x50478aff), assetName: "ionic",),
+          LogoView(color: Color(0x50344955), assetName: "cordova",),
+          LogoView(color: Color(0x50000000), assetName: "phonegap",),
+          LogoView(color: Color(0x503498db), assetName: "xamarin",),
         ],
       ),
       Container(
