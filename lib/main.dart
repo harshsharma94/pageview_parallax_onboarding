@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:pageview_parallax_onboarding/NotifyingPageView.dart';
+import 'package:rect_getter/rect_getter.dart';
 
 import 'PageViewState.dart';
 
@@ -27,7 +28,7 @@ class HomePage extends StatefulWidget {
 
 class _HomePageState extends State<HomePage> {
   ValueNotifier<PageViewState> _notifier = ValueNotifier<PageViewState>(PageViewState(pageProgress: 0, previousPage: 0));
-  var _sharedElementKey = GlobalKey(); // TODO:
+  var _sharedElementKey = RectGetter.createGlobalKey();
 
   @override
   void initState() {
@@ -66,7 +67,7 @@ class _HomePageState extends State<HomePage> {
         crossAxisCount: 2,
         children: <Widget>[
           FlutterLogo(),
-          FlutterLogo(),
+          RectGetter(key: _sharedElementKey, child: Container()),
           FlutterLogo(),
           FlutterLogo(),
           FlutterLogo(),
