@@ -1,5 +1,6 @@
 import 'dart:ui';
 
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:pageview_parallax_onboarding/LogoView.dart';
 import 'package:pageview_parallax_onboarding/NotifyingPageView.dart';
@@ -46,23 +47,19 @@ class _HomePageState extends State<HomePage> {
       var overlayEntry = OverlayEntry(
         builder: (context) {
           return AnimatedBuilder(
-            animation: _notifier,
-            builder: (context, child) {
+              animation: _notifier,
+              builder: (context, child) {
+                Size evaluatedSize = _getSharedElementSize(_notifier.value,
+                    sharedRect); // returns shared element size based on page position for all pages
 
-              Size evaluatedSize = _getSharedElementSize(
-                _notifier.value,
-                sharedRect
-              ); // returns shared element size based on page position for all pages
-
-              if(_notifier.value.previousPage == 0) {
-                return _getPage1TransformedWidget(evaluatedSize);
-              } else if(_notifier.value.previousPage == 1) {
-                return _getPage1TransformedWidget(evaluatedSize);
-              } else {
-                throw FormatException();
-              }
-            }
-          );
+                if (_notifier.value.previousPage == 0) {
+                  return _getPage1TransformedWidget(evaluatedSize);
+                } else if (_notifier.value.previousPage == 1) {
+                  return _getPage1TransformedWidget(evaluatedSize);
+                } else {
+                  throw FormatException();
+                }
+              });
         },
       );
       overlayState.insert(overlayEntry);
@@ -71,25 +68,21 @@ class _HomePageState extends State<HomePage> {
   }
 
   void _initPathToFinalState(Rect initialRect) {
-    Size screenSize = MediaQuery.of(context).size;
-    _finalOffset = Offset(screenSize.width/2, screenSize.height/2);
+    final screenSize = MediaQuery.of(context).size;
+    _finalOffset = Offset(screenSize.width / 2, screenSize.height / 2);
     _path = _getPathToCenter(initialRect, _finalOffset);
   }
 
   Widget _getPage1TransformedWidget(Size evaluatedSize) {
     return Positioned(
-        left: _getOffsetFor(
-            _notifier.value.pageProgress,
-            _path
-        ).dx - evaluatedSize.width/2,
-        top: _getOffsetFor(
-            _notifier.value.pageProgress,
-            _path
-        ).dy - evaluatedSize.height/2,
+        left: _getOffsetFor(_notifier.value.pageProgress, _path).dx -
+            evaluatedSize.width / 2,
+        top: _getOffsetFor(_notifier.value.pageProgress, _path).dy -
+            evaluatedSize.height / 2,
         child: SizedBox(
             width: evaluatedSize.width,
             height: evaluatedSize.height,
-            child:  Container(
+            child: Container(
                 decoration: BoxDecoration(
                   color: Color(0x5060c9f8),
                   borderRadius: BorderRadius.all(
@@ -98,23 +91,16 @@ class _HomePageState extends State<HomePage> {
                 child: Center(
                     child: Image.asset("assets/flutter.png",
                         width: _getSharedElementLogoSize(),
-                        height: _getSharedElementLogoSize())
-                )
-            )
-        )
-    );
+                        height: _getSharedElementLogoSize())))));
   }
 
   Size _getSharedElementSize(PageViewState pageViewState, Rect sharedRect) {
-    Size initialSize = Size(sharedRect.width, sharedRect.height);
-    Size finalSize = Size(sharedRect.width/3, sharedRect.height/3);
+    final initialSize = Size(sharedRect.width, sharedRect.height);
+    final finalSize = Size(sharedRect.width / 3, sharedRect.height / 3);
 
-    if(pageViewState.previousPage == 0) {
-      return Size.lerp(
-          initialSize,
-          finalSize,
-          _notifier.value.pageProgress)!;
-    } else if(pageViewState.previousPage == 1) {
+    if (pageViewState.previousPage == 0) {
+      return Size.lerp(initialSize, finalSize, _notifier.value.pageProgress)!;
+    } else if (pageViewState.previousPage == 1) {
       // final state of page 1 should be same as
       // initial state of page 2
       return finalSize;
@@ -126,16 +112,17 @@ class _HomePageState extends State<HomePage> {
   Path _getPathToCenter(Rect rect, Offset centre) {
     return Path()
       ..moveTo(rect.center.dx, rect.center.dy)
-      ..quadraticBezierTo(rect.center.dx, rect.center.dy, _finalOffset.dx, _finalOffset.dy);
+      ..quadraticBezierTo(
+          rect.center.dx, rect.center.dy, _finalOffset.dx, _finalOffset.dy);
   }
 
   Offset _getOffsetFor(double value, Path path) {
-    if(_notifier.value.previousPage == 0) {
+    if (_notifier.value.previousPage == 0) {
       PathMetric pathMetric = path.computeMetrics().elementAt(0);
       value = value * pathMetric.length;
       Tangent tangent = pathMetric.getTangentForOffset(value)!;
       return tangent.position;
-    } else if(_notifier.value.previousPage == 1) {
+    } else if (_notifier.value.previousPage == 1) {
       return _finalOffset;
     } else {
       throw FormatException();
@@ -143,12 +130,13 @@ class _HomePageState extends State<HomePage> {
   }
 
   double _getSharedElementRadius() {
-    double initialRadius = 0;
-    double finalRadius = 40;
+    final initialRadius = 0.0;
+    final finalRadius = 40.0;
 
-    if(_notifier.value.previousPage == 0) {
-      return lerpDouble(initialRadius, finalRadius, _notifier.value.pageProgress)!;
-    } else if(_notifier.value.previousPage == 1) {
+    if (_notifier.value.previousPage == 0) {
+      return lerpDouble(
+          initialRadius, finalRadius, _notifier.value.pageProgress)!;
+    } else if (_notifier.value.previousPage == 1) {
       return finalRadius;
     } else {
       throw FormatException();
@@ -156,12 +144,12 @@ class _HomePageState extends State<HomePage> {
   }
 
   double _getSharedElementLogoSize() {
-    double initialSize = 50; // same as LogoView.dart widget size
-    double finalSize = 25;
+    final initialSize = 50.0; // same as LogoView.dart widget size
+    final finalSize = 25.0;
 
-    if(_notifier.value.previousPage == 0) {
+    if (_notifier.value.previousPage == 0) {
       return lerpDouble(initialSize, finalSize, _notifier.value.pageProgress)!;
-    } else if(_notifier.value.previousPage == 1) {
+    } else if (_notifier.value.previousPage == 1) {
       return finalSize;
     } else {
       throw FormatException();
@@ -182,7 +170,7 @@ class _HomePageState extends State<HomePage> {
           children: [
             Expanded(
               child: NotifyingPageView(
-                children: _pages(),
+                children: _pages(_notifier),
                 notifier: _notifier,
                 sharedElement: _sharedElementKey,
               ),
@@ -193,29 +181,79 @@ class _HomePageState extends State<HomePage> {
     );
   }
 
-  List<Widget> _pages() {
+  List<Widget> _pages(ValueListenable<PageViewState> animation) {
     return <Widget>[
-      GridView.count(
-        crossAxisCount: 2,
-        children: <Widget>[
-          LogoView(color: Color(0x50000000), assetName: "reactnative",),
-          RectGetter(key: _sharedElementKey, child: Container()),
-          LogoView(color: Color(0x50478aff), assetName: "ionic",),
-          LogoView(color: Color(0x50344955), assetName: "cordova",),
-          LogoView(color: Color(0x50000000), assetName: "phonegap",),
-          LogoView(color: Color(0x503498db), assetName: "xamarin",),
-        ],
-      ),
-      Container(
-          decoration: BoxDecoration(
-              border: Border.all(
-                  color: Colors.black,
-                  width: 25
-              ),
-              borderRadius: BorderRadius.all(Radius.circular(20))
-          ),
-          child: Text('You\'re God damn right'),
-      )
+      _getPage1WidgetBG(animation),
+      _getPage2WidgetBG(animation)
     ];
+  }
+
+  Widget _getPage1WidgetBG(ValueListenable<PageViewState> animation) {
+    return GridView.count(
+      crossAxisCount: 2,
+      children: <Widget>[
+        LogoView(
+          color: Color(0x50000000),
+          assetName: "reactnative",
+          listenable: animation,
+        ),
+        RectGetter(key: _sharedElementKey, child: Container()),
+        LogoView(
+          color: Color(0x50478aff),
+          assetName: "ionic",
+          listenable: animation,
+        ),
+        LogoView(
+          color: Color(0x50344955),
+          assetName: "cordova",
+          listenable: animation,
+        ),
+        LogoView(
+          color: Color(0x50000000),
+          assetName: "phonegap",
+          listenable: animation,
+        ),
+        LogoView(
+          color: Color(0x503498db),
+          assetName: "xamarin",
+          listenable: animation,
+        ),
+      ],
+    );
+  }
+
+  Widget _getPage2WidgetBG(ValueListenable<PageViewState> animation) {
+    final width = 160.0;
+    final height = 135.0;
+
+    return Container(
+        decoration: BoxDecoration(
+            border: Border.all(color: Colors.black, width: 20),
+            borderRadius: BorderRadius.all(Radius.circular(15))),
+        child: AnimatedBuilder(
+          animation: animation,
+          builder: (context, child) {
+            final imageXOffset = animation.value.previousPage == 0 ?
+            lerpDouble(_finalOffset.dx+width/2, 0.0, _notifier.value.pageProgress)! : 0.0;
+
+            return Align(
+              alignment: Alignment.topCenter,
+              child: Transform.translate(
+                offset: Offset(
+                    imageXOffset,
+                    0
+                ),
+                child: ClipRRect(
+                  borderRadius: BorderRadius.circular(25),
+                  child: Image.asset(
+                      "assets/heisenberg.jpg",
+                      width: width,
+                      height: height
+                  ),
+                ),
+              ),
+            );
+          },
+        ));
   }
 }
