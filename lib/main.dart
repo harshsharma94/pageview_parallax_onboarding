@@ -46,20 +46,36 @@ class _HomePageState extends State<HomePage> {
           return AnimatedBuilder(
             animation: _notifier,
             builder: (context, child) {
+
+              Size evaluatedSize = _getSharedElementSize(
+                _notifier.value,
+                sharedRect
+              );
+
               return Positioned(
-                  left: _getOffsetFor(
-                      _notifier.value.pageProgress,
-                      _path
-                  ).dx - sharedRect.width/2,
-                  top: _getOffsetFor(
-                      _notifier.value.pageProgress,
-                      _path
-                  ).dy - sharedRect.height/2,
-                  child: SizedBox(
-                    width: sharedRect.width,
-                    height: sharedRect.height,
-                    child: LogoView(color: Color(0x5060c9f8), assetName: "flutter"),
-                  )
+                left: _getOffsetFor(
+                    _notifier.value.pageProgress,
+                    _path
+                ).dx - evaluatedSize.width/2,
+                top: _getOffsetFor(
+                    _notifier.value.pageProgress,
+                    _path
+                ).dy - evaluatedSize.height/2,
+                child: SizedBox(
+                  width: evaluatedSize.width,
+                  height: evaluatedSize.height,
+                  child:  Container(
+                    decoration: BoxDecoration(
+                      color: Color(0x5060c9f8),
+                      borderRadius: BorderRadius.all(Radius.circular(lerpDouble(0, 40, _notifier.value.pageProgress)!)), //TODO: Radius should be in terms of rect
+                    ),
+                    child: Center(
+                        child: Image.asset("assets/flutter.png",
+                            width: lerpDouble(50, 25, _notifier.value.pageProgress),
+                            height: lerpDouble(50, 25, _notifier.value.pageProgress))
+                    )
+                    )
+                )
               );
             }
           );
@@ -68,6 +84,21 @@ class _HomePageState extends State<HomePage> {
       overlayState.insert(overlayEntry);
     });
     super.initState();
+  }
+
+  Size _getSharedElementSize(PageViewState pageViewState, Rect sharedRect) {
+    if(pageViewState.previousPage == 0) {
+      return Size.lerp(
+          Size(sharedRect.width, sharedRect.height),
+          Size(sharedRect.width/3, sharedRect.height/3),
+          _notifier.value.pageProgress)!;
+    } else if(pageViewState.previousPage == 1) {
+      // final state of page 1 should be same as
+      // initial state of page 2
+      return Size(sharedRect.width/3, sharedRect.height/3);
+    } else {
+      throw FormatException();
+    }
   }
 
   Path _getPathToCenter(Rect rect) {
