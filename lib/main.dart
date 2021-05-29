@@ -33,12 +33,14 @@ class HomePage extends StatefulWidget {
 class _HomePageState extends State<HomePage> {
   ValueNotifier<PageViewState> _notifier = ValueNotifier<PageViewState>(
       PageViewState(pageProgress: 0, previousPage: 0));
-  var _sharedElementKey = RectGetter.createGlobalKey();
+  final _sharedElementKey = RectGetter.createGlobalKey();
+  final _page2SharedElementKey = RectGetter.createGlobalKey();
   late Offset _finalOffset; // Position after first page ends
   late Path _path;
 
   @override
   void initState() {
+    _finalOffset = Offset(0,0);
     WidgetsBinding.instance!.addPostFrameCallback((_) {
       Rect sharedRect = RectGetter.getRectFromKey(_sharedElementKey)!;
       OverlayState overlayState = Overlay.of(context)!;
@@ -68,8 +70,7 @@ class _HomePageState extends State<HomePage> {
   }
 
   void _initPathToFinalState(Rect initialRect) {
-    final screenSize = MediaQuery.of(context).size;
-    _finalOffset = Offset(screenSize.width / 2, screenSize.height / 2);
+    _finalOffset = RectGetter.getRectFromKey(_page2SharedElementKey)!.center;
     _path = _getPathToCenter(initialRect, _finalOffset);
   }
 
@@ -189,71 +190,79 @@ class _HomePageState extends State<HomePage> {
   }
 
   Widget _getPage1WidgetBG(ValueListenable<PageViewState> animation) {
-    return GridView.count(
-      crossAxisCount: 2,
-      children: <Widget>[
-        LogoView(
-          color: Color(0x50000000),
-          assetName: "reactnative",
-          listenable: animation,
+    return Stack(
+      children: [
+        GridView.count(
+          crossAxisCount: 2,
+          children: <Widget>[
+            LogoView(
+              color: Color(0x50000000),
+              assetName: "reactnative",
+              listenable: animation,
+            ),
+            RectGetter(key: _sharedElementKey, child: Container()),
+            // ^Initial Position of Shared Element
+            LogoView(
+              color: Color(0x50478aff),
+              assetName: "ionic",
+              listenable: animation,
+            ),
+            LogoView(
+              color: Color(0x50344955),
+              assetName: "cordova",
+              listenable: animation,
+            ),
+            LogoView(
+              color: Color(0x50000000),
+              assetName: "phonegap",
+              listenable: animation,
+            ),
+            LogoView(
+              color: Color(0x503498db),
+              assetName: "xamarin",
+              listenable: animation,
+            ),
+          ],
         ),
-        RectGetter(key: _sharedElementKey, child: Container()),
-        LogoView(
-          color: Color(0x50478aff),
-          assetName: "ionic",
-          listenable: animation,
-        ),
-        LogoView(
-          color: Color(0x50344955),
-          assetName: "cordova",
-          listenable: animation,
-        ),
-        LogoView(
-          color: Color(0x50000000),
-          assetName: "phonegap",
-          listenable: animation,
-        ),
-        LogoView(
-          color: Color(0x503498db),
-          assetName: "xamarin",
-          listenable: animation,
-        ),
+        RectGetter(key: _page2SharedElementKey, child: Center(child: Container()))
+        // Final position of shared element
       ],
     );
   }
 
   Widget _getPage2WidgetBG(ValueListenable<PageViewState> animation) {
-    final width = 160.0;
-    final height = 135.0;
+    final crownWidth = 80.0;
+    final crownHeight = 60.0;
 
-    return Container(
-        decoration: BoxDecoration(
+    return Stack(
+      children: [
+        Container(decoration: BoxDecoration(
             border: Border.all(color: Colors.black, width: 20),
-            borderRadius: BorderRadius.all(Radius.circular(15))),
-        child: AnimatedBuilder(
+            borderRadius: BorderRadius.all(Radius.circular(15)))),
+        AnimatedBuilder(
           animation: animation,
           builder: (context, child) {
             final imageXOffset = animation.value.previousPage == 0 ?
-            lerpDouble(_finalOffset.dx+width/2, 0.0, _notifier.value.pageProgress)! : 0.0;
+            lerpDouble(_finalOffset.dx + crownWidth / 2, 0.0,
+                _notifier.value.pageProgress)! : 0.0;
 
             return Align(
-              alignment: Alignment.topCenter,
+              alignment: Alignment.center,
               child: Transform.translate(
                 offset: Offset(
                     imageXOffset,
-                    0
+                    -50
                 ),
-                child: ClipRRect(
-                  borderRadius: BorderRadius.circular(25),
-                  child: Image.asset(
-                      "assets/heisenberg.jpg",
-                      width: width,
-                      height: height
-                  ),
+                child: Image.asset(
+                    "assets/crown.png",
+                    width: crownWidth,
+                    height: crownHeight
                 ),
               ),
             );
           },
-        ));
+        ),
+      ],
+    );
   }
 }
