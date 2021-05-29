@@ -30,8 +30,10 @@ class HomePage extends StatefulWidget {
 }
 
 class _HomePageState extends State<HomePage> {
-  ValueNotifier<PageViewState> _notifier = ValueNotifier<PageViewState>(PageViewState(pageProgress: 0, previousPage: 0));
+  ValueNotifier<PageViewState> _notifier = ValueNotifier<PageViewState>(
+      PageViewState(pageProgress: 0, previousPage: 0));
   var _sharedElementKey = RectGetter.createGlobalKey();
+  late Offset _finalOffset; // Position after first page ends
   late Path _path;
 
   @override
@@ -39,7 +41,7 @@ class _HomePageState extends State<HomePage> {
     WidgetsBinding.instance!.addPostFrameCallback((_) {
       Rect sharedRect = RectGetter.getRectFromKey(_sharedElementKey)!;
       OverlayState overlayState = Overlay.of(context)!;
-      _path = _getPathToCenter(sharedRect);
+      _initPathToFinalState(sharedRect);
 
       var overlayEntry = OverlayEntry(
         builder: (context) {
@@ -50,33 +52,15 @@ class _HomePageState extends State<HomePage> {
               Size evaluatedSize = _getSharedElementSize(
                 _notifier.value,
                 sharedRect
-              );
+              ); // returns shared element size based on page position for all pages
 
-              return Positioned(
-                left: _getOffsetFor(
-                    _notifier.value.pageProgress,
-                    _path
-                ).dx - evaluatedSize.width/2,
-                top: _getOffsetFor(
-                    _notifier.value.pageProgress,
-                    _path
-                ).dy - evaluatedSize.height/2,
-                child: SizedBox(
-                  width: evaluatedSize.width,
-                  height: evaluatedSize.height,
-                  child:  Container(
-                    decoration: BoxDecoration(
-                      color: Color(0x5060c9f8),
-                      borderRadius: BorderRadius.all(Radius.circular(lerpDouble(0, 40, _notifier.value.pageProgress)!)), //TODO: Radius should be in terms of rect
-                    ),
-                    child: Center(
-                        child: Image.asset("assets/flutter.png",
-                            width: lerpDouble(50, 25, _notifier.value.pageProgress),
-                            height: lerpDouble(50, 25, _notifier.value.pageProgress))
-                    )
-                    )
-                )
-              );
+              if(_notifier.value.previousPage == 0) {
+                return _getPage1TransformedWidget(evaluatedSize);
+              } else if(_notifier.value.previousPage == 1) {
+                return _getPage1TransformedWidget(evaluatedSize);
+              } else {
+                throw FormatException();
+              }
             }
           );
         },
@@ -86,33 +70,102 @@ class _HomePageState extends State<HomePage> {
     super.initState();
   }
 
+  void _initPathToFinalState(Rect initialRect) {
+    Size screenSize = MediaQuery.of(context).size;
+    _finalOffset = Offset(screenSize.width/2, screenSize.height/2);
+    _path = _getPathToCenter(initialRect, _finalOffset);
+  }
+
+  Widget _getPage1TransformedWidget(Size evaluatedSize) {
+    return Positioned(
+        left: _getOffsetFor(
+            _notifier.value.pageProgress,
+            _path
+        ).dx - evaluatedSize.width/2,
+        top: _getOffsetFor(
+            _notifier.value.pageProgress,
+            _path
+        ).dy - evaluatedSize.height/2,
+        child: SizedBox(
+            width: evaluatedSize.width,
+            height: evaluatedSize.height,
+            child:  Container(
+                decoration: BoxDecoration(
+                  color: Color(0x5060c9f8),
+                  borderRadius: BorderRadius.all(
+                      Radius.circular(_getSharedElementRadius())),
+                ),
+                child: Center(
+                    child: Image.asset("assets/flutter.png",
+                        width: _getSharedElementLogoSize(),
+                        height: _getSharedElementLogoSize())
+                )
+            )
+        )
+    );
+  }
+
   Size _getSharedElementSize(PageViewState pageViewState, Rect sharedRect) {
+    Size initialSize = Size(sharedRect.width, sharedRect.height);
+    Size finalSize = Size(sharedRect.width/3, sharedRect.height/3);
+
     if(pageViewState.previousPage == 0) {
       return Size.lerp(
-          Size(sharedRect.width, sharedRect.height),
-          Size(sharedRect.width/3, sharedRect.height/3),
+          initialSize,
+          finalSize,
           _notifier.value.pageProgress)!;
     } else if(pageViewState.previousPage == 1) {
       // final state of page 1 should be same as
       // initial state of page 2
-      return Size(sharedRect.width/3, sharedRect.height/3);
+      return finalSize;
     } else {
       throw FormatException();
     }
   }
 
-  Path _getPathToCenter(Rect rect) {
-    var screenSize = MediaQuery.of(context).size;
+  Path _getPathToCenter(Rect rect, Offset centre) {
     return Path()
       ..moveTo(rect.center.dx, rect.center.dy)
-      ..quadraticBezierTo(rect.center.dx, rect.center.dy, screenSize.width/2, screenSize.height/2);
+      ..quadraticBezierTo(rect.center.dx, rect.center.dy, _finalOffset.dx, _finalOffset.dy);
   }
 
   Offset _getOffsetFor(double value, Path path) {
-    PathMetric pathMetric = path.computeMetrics().elementAt(0);
-    value = value * pathMetric.length;
-    Tangent tangent = pathMetric.getTangentForOffset(value)!;
-    return tangent.position;
+    if(_notifier.value.previousPage == 0) {
+      PathMetric pathMetric = path.computeMetrics().elementAt(0);
+      value = value * pathMetric.length;
+      Tangent tangent = pathMetric.getTangentForOffset(value)!;
+      return tangent.position;
+    } else if(_notifier.value.previousPage == 1) {
+      return _finalOffset;
+    } else {
+      throw FormatException();
+    }
+  }
+
+  double _getSharedElementRadius() {
+    double initialRadius = 0;
+    double finalRadius = 40;
+
+    if(_notifier.value.previousPage == 0) {
+      return lerpDouble(initialRadius, finalRadius, _notifier.value.pageProgress)!;
+    } else if(_notifier.value.previousPage == 1) {
+      return finalRadius;
+    } else {
+      throw FormatException();
+    }
+  }
+
+  double _getSharedElementLogoSize() {
+    double initialSize = 50; // same as LogoView.dart widget size
+    double finalSize = 25;
+
+    if(_notifier.value.previousPage == 0) {
+      return lerpDouble(initialSize, finalSize, _notifier.value.pageProgress)!;
+    } else if(_notifier.value.previousPage == 1) {
+      return finalSize;
+    } else {
+      throw FormatException();
+    }
   }
 
   @override
