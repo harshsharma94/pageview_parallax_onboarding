@@ -4,13 +4,11 @@ import 'PageViewState.dart';
 
 class NotifyingPageView extends StatefulWidget {
   final ValueNotifier<PageViewState> notifier;
-  final GlobalKey sharedElement;
   final List<Widget> children;
 
   const NotifyingPageView({
     required this.children,
     required this.notifier,
-    required this.sharedElement
   });
 
   @override
@@ -20,7 +18,6 @@ class NotifyingPageView extends StatefulWidget {
 class _NotifyingPageViewState extends State<NotifyingPageView> {
   late int _previousPage;
   late PageController _pageController;
-  var sharedElementKey;
 
   void _onScroll() {
     if (_pageController.page!.toInt() == _pageController.page || _pageController.page!.toInt() < _previousPage) {
@@ -34,11 +31,9 @@ class _NotifyingPageViewState extends State<NotifyingPageView> {
 
   @override
   void initState() {
-    sharedElementKey = widget.sharedElement;
     _pageController = PageController(
       initialPage: 0,
-    )
-      ..addListener(_onScroll);
+    )..addListener(_onScroll);
 
     _previousPage = _pageController.initialPage;
     super.initState();

@@ -173,7 +173,6 @@ class _HomePageState extends State<HomePage> {
               child: NotifyingPageView(
                 children: _pages(_notifier),
                 notifier: _notifier,
-                sharedElement: _sharedElementKey,
               ),
             ),
           ],
@@ -253,14 +252,15 @@ class _HomePageState extends State<HomePage> {
                     imageXOffset,
                     -50
                 ),
-                child: Image.asset(
-                    "assets/crown.png",
-                    width: crownWidth,
-                    height: crownHeight
-                ),
+                child: child,
               ),
             );
           },
+          child: Image.asset(
+              "assets/crown.png",
+              width: crownWidth,
+              height: crownHeight
+          )
         ),
       ],
     );

@@ -32,14 +32,15 @@ class LogoView extends StatelessWidget {
               opacity: opacity,
               child: Transform.translate(
                 offset: Offset(offsetX, 0),
-                child: Image.asset(
-                  "assets/"+assetName+".png",
-                  width: 50,
-                  height: 50,
-                ),
+                child: child,
               ),
             );
           },
+          child: Image.asset(
+            "assets/"+assetName+".png",
+            width: 50,
+            height: 50,
+          ),
         ),
       ),
     );
