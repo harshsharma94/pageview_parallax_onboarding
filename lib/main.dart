@@ -114,7 +114,7 @@ class _HomePageState extends State<HomePage> {
     return Path()
       ..moveTo(rect.center.dx, rect.center.dy)
       ..quadraticBezierTo(
-          rect.center.dx, rect.center.dy, _finalOffset.dx, _finalOffset.dy);
+          rect.center.dx*1.5, rect.center.dy, _finalOffset.dx, _finalOffset.dy);
   }
 
   Offset _getOffsetFor(double value, Path path) {
