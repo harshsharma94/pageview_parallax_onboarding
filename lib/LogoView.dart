@@ -24,12 +24,19 @@ class LogoView extends StatelessWidget {
                 ? lerpDouble(0, -100, listenable.value.pageProgress)!
                 : 0.0;
 
-            return Transform.translate(
-              offset: Offset(offsetX, 0),
-              child: Image.asset(
-                "assets/"+assetName+".png",
-                width: 50,
-                height: 50,
+            final opacity = listenable.value.previousPage == 0
+                ? lerpDouble(1, 0.3, listenable.value.pageProgress)!
+                : 0.3;
+
+            return Opacity(
+              opacity: opacity,
+              child: Transform.translate(
+                offset: Offset(offsetX, 0),
+                child: Image.asset(
+                  "assets/"+assetName+".png",
+                  width: 50,
+                  height: 50,
+                ),
               ),
             );
           },
